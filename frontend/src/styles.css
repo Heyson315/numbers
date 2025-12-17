@@ -1,0 +1,8 @@
+body { font-family: system-ui, Arial, sans-serif; margin: 0; padding: 1rem; background:#f6f8fa; }
+textarea, input { width:100%; margin:.5rem 0; padding:.5rem; font-family:inherit; }
+button { padding:.5rem 1rem; margin:.5rem 0; cursor:pointer; }
+.error { color:#b00020; background:#ffe5e5; padding:.5rem; border-radius:4px; }
+.card { max-width:360px; margin:2rem auto; background:#fff; padding:1.25rem; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,.08); }
+nav.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:.75rem; margin:1rem 0; }
+nav.grid a { background:#fff; padding:.75rem; text-decoration:none; border:1px solid #ddd; border-radius:6px; color:#0366d6; font-weight:500; }
+.result { background:#fff; padding:1rem; border-radius:6px; box-shadow:0 1px 4px rgba(0,0,0,.06); overflow:auto; max-height:340px; }

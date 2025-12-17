@@ -1,0 +1,8 @@
+# Optional heavy AI/NLP dependencies.
+# Install ONLY if you need advanced deep learning or NLP features
+# and are running on a supported Python version (<3.13).
+# Example install: pip install -r requirements-optional.txt
+
+tensorflow>=2.13.0; python_version < "3.13"
+transformers>=4.48.0; python_version < "3.13"
+spacy>=3.6.0; python_version < "3.13"

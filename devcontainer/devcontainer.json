@@ -1,0 +1,42 @@
+{
+	"name": "Vigilant Octo Engine Dev Environment",
+	// Use a universal image that includes Python and Node.js
+	"image": "mcr.microsoft.com/devcontainers/universal:2",
+
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				// Essential for Python development
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				// GitHub Copilot and its chat feature
+				"GitHub.copilot",
+				"GitHub.copilot-chat",
+				// For SonarCloud integration later
+				"SonarSource.sonarlint-vscode",
+				// Useful for working with Docker
+				"ms-azuretools.vscode-docker",
+				// Essential for React/TypeScript frontend development
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"ms-vscode.vscode-typescript-next",
+				"dsznajder.es7-react-js-snippets"
+			]
+		}
+	},
+
+	"forwardPorts": [8000, 5173],
+	"portsAttributes": {
+		"8000": {
+			"label": "Backend API",
+			"onAutoForward": "notify"
+		},
+		"5173": {
+			"label": "Frontend Dev Server",
+			"onAutoForward": "notify"
+		}
+	},
+	// Run commands after the container is created
+	"postCreateCommand": "cp .env.example .env && pip install -r requirements.txt && cd frontend && npm install && cd .. && mkdir -p logs models secure_data && echo 'Development environment ready. Backend (port 8000) and frontend (port 5173) dependencies installed.'"
+}

@@ -1,0 +1,27 @@
+# Bandit configuration for vigilant-octo-engine
+# Security scanning configuration for Python code
+
+[bandit]
+# Exclude test files and virtual environments
+exclude_dirs = ['/tests/', '/venv/', '/.venv/', '/env/', '/build/', '/dist/']
+
+# Test to skip (use with caution - document why each is skipped)
+skips = []
+
+# Severity level (LOW, MEDIUM, HIGH)
+# Only report issues at or above this level
+# For production code: use LOW
+# For initial scans: use MEDIUM to reduce noise
+# Current: MEDIUM (flags demo credentials as expected)
+
+# Confidence level (LOW, MEDIUM, HIGH)
+# Only report issues with at least this confidence
+# Current: MEDIUM (reduces false positives)
+
+[bandit.baseline]
+# Use bandit -f json -o baseline.json to create baseline
+# Then: bandit -b baseline.json to only report new issues
+# baseline = baseline.json
+
+[bandit.formatters]
+# Available: csv, json, txt, html, custom, screen, yaml
