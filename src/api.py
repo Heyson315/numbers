@@ -457,6 +457,349 @@ async def get_audit_log(
         raise HTTPException(status_code=500, detail="Error retrieving audit log")
 
 
+# ========== QuickBooks Integration Endpoints ==========
+
+@app.post("/api/quickbooks/auth/initiate")
+@limiter.limit("5/minute")
+async def initiate_qbo_auth(request: Request, user: Dict[str, Any] = Depends(verify_token)):
+    """Start QuickBooks OAuth flow."""
+    from src.integrations.quickbooks import QuickBooksAuth
+    
+    if not access_control.check_permission(user.get('role', ''), 'manage_users'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        qb_auth = QuickBooksAuth()
+        auth_data = qb_auth.get_authorization_url()
+        
+        return {
+            "authorization_url": auth_data["authorization_url"],
+            "state": auth_data["state"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error initiating QuickBooks auth: {str(e)}")
+
+
+@app.get("/api/quickbooks/auth/callback")
+async def qbo_auth_callback(code: str, realm_id: str, state: str):
+    """OAuth callback handler for QuickBooks."""
+    from src.integrations.quickbooks import QuickBooksAuth
+    
+    try:
+        qb_auth = QuickBooksAuth()
+        token_storage = await qb_auth.exchange_code(code, realm_id)
+        
+        return {
+            "status": "success",
+            "message": "QuickBooks connected successfully",
+            "realm_id": realm_id
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OAuth callback error: {str(e)}")
+
+
+@app.post("/api/quickbooks/sync/trial-balance")
+@limiter.limit("10/minute")
+async def sync_trial_balance(
+    request: Request,
+    start_date: str,
+    end_date: str,
+    realm_id: str,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Sync trial balance from QuickBooks."""
+    from src.integrations.quickbooks import QuickBooksAuth, QuickBooksClient, QuickBooksSync
+    
+    if not access_control.check_permission(user.get('role', ''), 'read'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        qb_auth = QuickBooksAuth()
+        qb_client = QuickBooksClient(qb_auth, realm_id)
+        qb_sync = QuickBooksSync(qb_client)
+        
+        result = await qb_sync.sync_trial_balance(start_date, end_date, user['sub'])
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sync error: {str(e)}")
+
+
+# ========== M365 Integration Endpoints ==========
+
+@app.post("/api/m365/auth/initiate")
+@limiter.limit("5/minute")
+async def initiate_m365_auth(request: Request, user: Dict[str, Any] = Depends(verify_token)):
+    """Start Microsoft 365 OAuth flow."""
+    from src.integrations.m365 import GraphClient
+    
+    if not access_control.check_permission(user.get('role', ''), 'manage_users'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        graph_client = GraphClient()
+        auth_data = graph_client.get_authorization_url()
+        
+        return {
+            "authorization_url": auth_data["authorization_url"],
+            "state": auth_data["state"]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error initiating M365 auth: {str(e)}")
+
+
+@app.get("/api/m365/onedrive/files")
+@limiter.limit("20/minute")
+async def list_onedrive_files(
+    request: Request,
+    folder_path: Optional[str] = None,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """List files in OneDrive."""
+    from src.integrations.m365 import GraphClient, OneDriveManager
+    
+    if not access_control.check_permission(user.get('role', ''), 'read'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        graph_client = GraphClient()
+        onedrive = OneDriveManager(graph_client)
+        files = await onedrive.list_files(folder_path, user['sub'])
+        
+        return {
+            "folder": folder_path or "root",
+            "file_count": len(files),
+            "files": [f.dict() for f in files]
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing files: {str(e)}")
+
+
+# ========== Financial Analysis Endpoints ==========
+
+@app.post("/api/analysis/trial-balance")
+@limiter.limit("20/minute")
+async def analyze_trial_balance(
+    request: Request,
+    trial_balance: Dict[str, Any],
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Analyze trial balance for accuracy and variances."""
+    from src.analysis import TrialBalanceAnalyzer
+    
+    if not access_control.check_permission(user.get('role', ''), 'read'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        analyzer = TrialBalanceAnalyzer()
+        result = analyzer.analyze_trial_balance(trial_balance, user['sub'])
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis error: {str(e)}")
+
+
+@app.post("/api/analysis/ratios")
+@limiter.limit("20/minute")
+async def calculate_ratios(
+    request: Request,
+    financial_data: Dict[str, Any],
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Calculate comprehensive financial ratios."""
+    from src.analysis import FinancialRatiosCalculator
+    
+    if not access_control.check_permission(user.get('role', ''), 'read'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        calculator = FinancialRatiosCalculator()
+        ratios = calculator.calculate_all_ratios(financial_data, user['sub'])
+        return ratios
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Calculation error: {str(e)}")
+
+
+@app.post("/api/analysis/adjusting-entries")
+@limiter.limit("10/minute")
+async def suggest_adjusting_entries(
+    request: Request,
+    transactions: List[Dict[str, Any]],
+    period_end: str,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Suggest adjusting entries using ML."""
+    from src.analysis import AdjustingEntrySuggester
+    from datetime import date
+    
+    if not access_control.check_permission(user.get('role', ''), 'write'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        suggester = AdjustingEntrySuggester()
+        period_end_date = date.fromisoformat(period_end)
+        suggestions = suggester.suggest_accrual_entries(transactions, period_end_date, user['sub'])
+        
+        return {
+            "period_end": period_end,
+            "suggestion_count": len(suggestions),
+            "suggestions": suggestions
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Suggestion error: {str(e)}")
+
+
+@app.post("/api/analysis/reconciliation")
+@limiter.limit("10/minute")
+async def enhanced_reconciliation(
+    request: Request,
+    bank_transactions: List[Dict[str, Any]],
+    book_transactions: List[Dict[str, Any]],
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Perform enhanced bank reconciliation with fuzzy matching."""
+    from src.analysis import EnhancedReconciliation
+    
+    if not access_control.check_permission(user.get('role', ''), 'write'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        reconciler = EnhancedReconciliation()
+        result = reconciler.reconcile_transactions(
+            bank_transactions,
+            book_transactions,
+            user['sub']
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Reconciliation error: {str(e)}")
+
+
+# ========== Compliance Endpoints ==========
+
+@app.get("/api/compliance/audit-log")
+@limiter.limit("10/minute")
+async def get_compliance_audit_log(
+    request: Request,
+    user_id: Optional[str] = None,
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Retrieve immutable audit logs."""
+    from src.compliance import ImmutableAuditTrail
+    
+    if not access_control.check_permission(user.get('role', ''), 'audit'):
+        raise HTTPException(status_code=403, detail="Admin/Auditor only")
+    
+    try:
+        audit_trail = ImmutableAuditTrail()
+        entries = audit_trail.get_entries(user_id, start_date, end_date)
+        verification = audit_trail.verify_chain()
+        
+        return {
+            "entries": entries,
+            "verification": verification,
+            "total": len(entries)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.get("/api/compliance/gdpr/data-subject/{data_subject_id}")
+@limiter.limit("5/minute")
+async def gdpr_data_subject_access(
+    data_subject_id: str,
+    request: Request,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """GDPR Right to Access request."""
+    from src.compliance import GDPRCompliance
+    
+    if not access_control.check_permission(user.get('role', ''), 'audit'):
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    try:
+        gdpr = GDPRCompliance()
+        result = gdpr.right_to_access(data_subject_id, user['sub'])
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.delete("/api/compliance/gdpr/data-subject/{data_subject_id}")
+@limiter.limit("2/minute")
+async def gdpr_right_to_erasure(
+    data_subject_id: str,
+    request: Request,
+    reason: Optional[str] = None,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """GDPR Right to Erasure (Right to be Forgotten)."""
+    from src.compliance import GDPRCompliance
+    
+    if not access_control.check_permission(user.get('role', ''), 'manage_users'):
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    try:
+        gdpr = GDPRCompliance()
+        result = gdpr.right_to_erasure(data_subject_id, user['sub'], reason)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.get("/api/compliance/sox/controls")
+@limiter.limit("10/minute")
+async def get_sox_controls(
+    request: Request,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Get SOX control status and compliance report."""
+    from src.compliance import SOXCompliance
+    
+    if not access_control.check_permission(user.get('role', ''), 'audit'):
+        raise HTTPException(status_code=403, detail="Auditor/Admin only")
+    
+    try:
+        sox = SOXCompliance()
+        report = sox.generate_sox_report()
+        deficiencies = sox.get_control_deficiencies()
+        
+        return {
+            "report": report,
+            "deficiencies": deficiencies
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@app.post("/api/compliance/data-retention/apply")
+@limiter.limit("5/minute")
+async def apply_data_retention(
+    request: Request,
+    data_type: str,
+    records: List[Dict[str, Any]],
+    dry_run: bool = True,
+    user: Dict[str, Any] = Depends(verify_token)
+):
+    """Apply data retention policy."""
+    from src.compliance import DataRetentionManager
+    
+    if not access_control.check_permission(user.get('role', ''), 'manage_users'):
+        raise HTTPException(status_code=403, detail="Admin only")
+    
+    try:
+        retention_mgr = DataRetentionManager()
+        result = retention_mgr.apply_retention_policy(
+            data_type,
+            records,
+            user['sub'],
+            dry_run
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 # Run server
 if __name__ == "__main__":
     uvicorn.run(
