@@ -39,7 +39,13 @@ class EncryptionManager:
         self.cipher = Fernet(self._derive_key(self.key))
 
     def _derive_key(self, password: bytes, salt: Optional[bytes] = None) -> bytes:
-        """Derive a proper Fernet key from the password."""
+        """
+        Derive a proper Fernet key from the password.
+        
+        Note: This method is used during initialization to create a single cipher
+        for the instance. The cipher is then reused for all encrypt/decrypt operations.
+        If salt is not provided, a random salt is generated (non-deterministic).
+        """
         if len(password) == 44:  # Already a valid Fernet key
             try:
                 Fernet(password)

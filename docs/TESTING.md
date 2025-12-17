@@ -494,7 +494,7 @@ git push origin feature/new-feature
 For testing questions or issues:
 - Open an issue on [GitHub](https://github.com/HHR-CPA/vigilant-octo-engine/issues)
 - Check existing issues and discussions
-- Contact: support@cpafirm.com
+- Email support: support@cpafirm.com (Note: Replace with actual support email for production use)
 
 ---
 
