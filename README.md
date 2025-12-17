@@ -518,14 +518,88 @@ For questions, issues, or feature requests:
 
 ## 🔄 Roadmap
 
-- [ ] Integration with QuickBooks/Xero
+- [x] Integration with QuickBooks Online (OAuth 2.0 + PKCE)
+- [x] Integration with Microsoft 365 (OneDrive/SharePoint)
+- [x] Financial analysis engine (ratios, trial balance, reconciliation)
+- [x] HIPAA/GDPR/SOX compliance framework
+- [x] Immutable audit trail with blockchain-style chaining
 - [ ] OCR for invoice scanning
 - [ ] Advanced ML models (deep learning)
 - [ ] Mobile app for expense submission
-- [ ] Real-time anomaly alerts
 - [ ] Multi-currency support
-- [ ] Blockchain audit trail
 - [ ] Automated tax form generation
+
+## 🆕 New Features
+
+### Enterprise Integrations
+- **QuickBooks Online**: Full OAuth 2.0 integration with PKCE, trial balance sync, journal entries, invoices
+- **Microsoft 365**: Azure AD authentication, OneDrive file sync, SharePoint list integration
+- **GAAP/IFRS Validation**: Automated compliance checking for financial data
+
+### Financial Analysis Engine
+- **Trial Balance Analysis**: Variance detection, period comparisons, budget vs actual
+- **Financial Ratios**: Liquidity, profitability, leverage, and efficiency ratios
+- **Adjusting Entries**: ML-powered suggestions for accruals, prepayments, depreciation
+- **Pattern Recognition**: Seasonality detection, spending trends, anomaly identification
+- **Enhanced Reconciliation**: Fuzzy matching for bank/book transactions
+
+### Compliance Framework
+- **RBAC**: Enhanced role-based access control with granular permissions (Admin, Auditor, Accountant, Viewer)
+- **HIPAA**: PHI encryption, access logging, breach detection, 6-year retention
+- **GDPR**: Consent management, Right to Access/Erasure/Portability, DPO notifications
+- **SOX**: Segregation of duties, control testing, access reviews, financial transaction logging
+- **Immutable Audit Trail**: SHA-256 blockchain-style chaining with tamper detection
+- **Data Retention**: Configurable policies (SOX 7-year, HIPAA 6-year)
+
+### Getting Started with Integrations
+
+See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) for detailed setup instructions.
+
+**Quick Setup:**
+
+1. Configure QuickBooks OAuth:
+```bash
+QBO_CLIENT_ID=your-client-id
+QBO_CLIENT_SECRET=your-client-secret
+QBO_REDIRECT_URI=https://your-app.com/api/quickbooks/auth/callback
+```
+
+2. Configure Microsoft 365:
+```bash
+AZURE_TENANT_ID=your-tenant-id
+AZURE_CLIENT_ID=your-client-id
+AZURE_CLIENT_SECRET=your-client-secret
+```
+
+3. Enable compliance features:
+```bash
+HIPAA_AUDIT_LOG_RETENTION_DAYS=2190
+GDPR_CONSENT_EXPIRY_DAYS=365
+SOX_SEGREGATION_ENABLED=true
+```
+
+### Compliance Features
+
+See [docs/COMPLIANCE.md](docs/COMPLIANCE.md) for complete compliance documentation.
+
+**Example Usage:**
+
+```python
+# HIPAA PHI encryption
+from src.compliance import HIPAACompliance
+hipaa = HIPAACompliance()
+encrypted_phi = hipaa.encrypt_phi(phi_data, user_id="doctor@hospital.com")
+
+# GDPR data subject rights
+from src.compliance import GDPRCompliance
+gdpr = GDPRCompliance()
+data_export = gdpr.right_to_access(data_subject_id="user@example.com")
+
+# SOX control testing
+from src.compliance import SOXCompliance
+sox = SOXCompliance()
+test_result = sox.test_control(control_id="CTRL-001", test_result="pass")
+```
 
 ---
 
