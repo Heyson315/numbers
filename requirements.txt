@@ -61,3 +61,17 @@ cerberus>=1.3.5
 
 # Rate limiting for API
 slowapi>=0.1.9
+
+# Integration Libraries
+httpx>=0.24.0  # Async HTTP client for API integrations
+msal>=1.24.0  # Microsoft Authentication Library for Azure AD/M365
+intuitlib>=0.6.0  # QuickBooks Online Python SDK
+python-dateutil>=2.8.2  # Date parsing for integrations
+
+# Financial Analysis
+scipy>=1.10.0  # Scientific computing for financial calculations
+statsmodels>=0.14.0  # Statistical models for financial analysis
+
+# Compliance & Data Retention
+jsonschema>=4.17.0  # Schema validation for compliance
+schedule>=1.2.0  # Task scheduling for retention policies
