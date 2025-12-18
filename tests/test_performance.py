@@ -4,6 +4,7 @@ Performance tests for optimized code.
 Tests to ensure performance improvements are maintained and regression is avoided.
 """
 
+import pytest
 import pandas as pd
 import time
 from datetime import datetime, timedelta

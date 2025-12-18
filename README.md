@@ -3,6 +3,8 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/downloads/)
 [![Security](https://img.shields.io/badge/security-enabled-green.svg)](docs/SECURITY.md)
+[![Tests](https://img.shields.io/badge/tests-49%20passing-brightgreen.svg)](docs/TESTING.md)
+[![Coverage](https://img.shields.io/badge/coverage-80%25%2B-brightgreen.svg)](docs/TESTING.md)
 
 A comprehensive AI-powered solution for automating finance, audit, and accounting tasks in CPA firm environments with enterprise-grade security controls.
 
@@ -441,6 +443,19 @@ frontend/
 
 ## 🧪 Testing
 
+**Quick Start:** See [TESTING_QUICKSTART.md](TESTING_QUICKSTART.md) for a 5-minute setup guide.
+
+**Full Documentation:** [docs/TESTING.md](docs/TESTING.md)
+
+### Current Test Status
+- ✅ **49 tests passing** (100%)
+- ✅ Security tests: 9
+- ✅ API tests: 16
+- ✅ AI/ML tests: 13
+- ✅ Performance tests: 11
+
+### Running Tests
+
 Run all tests:
 ```bash
 pytest tests/ -v
@@ -455,6 +470,25 @@ Run with coverage:
 ```bash
 pytest tests/ --cov=src --cov-report=html
 ```
+
+### Test Categories
+
+| Category | File | Tests | Description |
+|----------|------|-------|-------------|
+| Security | `test_security.py` | 9 | Encryption, auth, access control |
+| API | `test_api.py` | 16 | REST endpoints, rate limiting |
+| Anomaly Detection | `test_anomaly_detection.py` | 5 | Fraud detection, outliers |
+| Expense Categorization | `test_expense_categorization.py` | 5 | ML classification, reconciliation |
+| Invoice Processing | `test_invoice_processing.py` | 3 | Data extraction, validation |
+| Performance | `test_performance.py` | 11 | Scalability, regression |
+
+### For Contributors
+
+When contributing, ensure:
+- All tests pass locally
+- Add tests for new features
+- Maintain >80% code coverage
+- Follow testing conventions in [docs/TESTING.md](docs/TESTING.md)
 
 ## 📊 Use Cases
 

@@ -38,8 +38,14 @@ class EncryptionManager:
         self.key = encryption_key.encode() if isinstance(encryption_key, str) else encryption_key
         self.cipher = Fernet(self._derive_key(self.key))
 
-    def _derive_key(self, password: bytes) -> bytes:
-        """Derive a proper Fernet key from the password."""
+    def _derive_key(self, password: bytes, salt: Optional[bytes] = None) -> bytes:
+        """
+        Derive a proper Fernet key from the password.
+        
+        Note: This method is used during initialization to create a single cipher
+        for the instance. The cipher is then reused for all encrypt/decrypt operations.
+        If salt is not provided, a random salt is generated (non-deterministic).
+        """
         if len(password) == 44:  # Already a valid Fernet key
             try:
                 Fernet(password)
@@ -48,6 +54,10 @@ class EncryptionManager:
                 # Not a valid Fernet key, will derive one below
                 pass
 
+        # Generate salt if not provided
+        if salt is None:
+            salt = os.urandom(16)
+        
         # Derive key using PBKDF2
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -82,14 +92,7 @@ class EncryptionManager:
         Returns:
             Decrypted plain text data
         """
-        try:
-            salt_b64, cipher_text = encrypted_data.split(':', 1)
-            salt = base64.urlsafe_b64decode(salt_b64.encode())
-        except Exception as e:
-            raise ValueError("Invalid encrypted_data format") from e
-        key = self._derive_key(self.master_key, salt)
-        cipher = Fernet(key)
-        decrypted = cipher.decrypt(cipher_text.encode())
+        decrypted = self.cipher.decrypt(encrypted_data.encode())
         return decrypted.decode()
 
     def encrypt_dict(self, data: Dict[str, Any]) -> str:
@@ -107,8 +110,6 @@ class AccessControl:
     """Manages access control and authentication."""
     
     def __init__(self, secret_key: Optional[str] = None, algorithm: Optional[str] = None):
-
-    def __init__(self, secret_key: Optional[str] = None):
         """
         Initialize access control.
 
