@@ -18,8 +18,6 @@ class AnomalyDetector:
     """AI-powered anomaly detection for audit trails."""
     
     def __init__(self, contamination: float = 0.1) -> None:
-
-    def __init__(self, contamination: float = 0.1):
         """
         Initialize anomaly detector.
 
@@ -500,14 +498,8 @@ class FraudRiskScorer:
     """Calculate fraud risk scores for transactions and entities."""
     
     def __init__(self) -> None:
-        """
-        Initialize fraud risk scorer.
-        """
-        self.risk_factors: Dict[str, Dict[str, Any]] = {
-
-    def __init__(self):
         """Initialize fraud risk scorer."""
-        self.risk_factors = {
+        self.risk_factors: Dict[str, Dict[str, Any]] = {
             'high_amount': {'threshold': 10000, 'weight': 0.3},
             'round_number': {'weight': 0.2},
             'duplicate': {'weight': 0.3},

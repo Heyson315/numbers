@@ -23,11 +23,8 @@ from src.audit_logging import AuditLogger, AuditEventType
 from src.invoice_processing import InvoiceProcessor, Invoice
 from src.expense_categorization import ExpenseCategorizer, SmartReconciliation
 from src.anomaly_detection import AnomalyDetector, FraudRiskScorer
-from security import AccessControl, EncryptionManager, SecureDataHandler
-from audit_logging import AuditLogger, AuditEventType
-from invoice_processing import InvoiceProcessor
-from expense_categorization import ExpenseCategorizer, SmartReconciliation
-from anomaly_detection import AnomalyDetector, FraudRiskScorer
+from src.integrations.quickbooks_routes import qb_router
+from src.integrations import M365_AVAILABLE, m365_router
 
 import pandas as pd
 
@@ -57,6 +54,13 @@ app = FastAPI(
     description="Secure API for automating finance, audit, and accounting tasks",
     version="1.0.0"
 )
+
+# Include QuickBooks routes
+app.include_router(qb_router, prefix="/api")
+
+# Include Microsoft 365 routes (SharePoint, OneDrive, Power BI, Power Automate)
+if M365_AVAILABLE and m365_router:
+    app.include_router(m365_router, prefix="/api")
 
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)

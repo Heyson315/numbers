@@ -48,11 +48,14 @@ class EncryptionManager:
                 # Not a valid Fernet key, will derive one below
                 pass
 
+        # Use a fixed salt for deterministic key derivation
+        fixed_salt = b'cpa_firm_salt_v1'
+        
         # Derive key using PBKDF2
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
             length=32,
-            salt=salt,
+            salt=fixed_salt,
             iterations=100000,
             backend=default_backend()
         )
@@ -82,14 +85,7 @@ class EncryptionManager:
         Returns:
             Decrypted plain text data
         """
-        try:
-            salt_b64, cipher_text = encrypted_data.split(':', 1)
-            salt = base64.urlsafe_b64decode(salt_b64.encode())
-        except Exception as e:
-            raise ValueError("Invalid encrypted_data format") from e
-        key = self._derive_key(self.master_key, salt)
-        cipher = Fernet(key)
-        decrypted = cipher.decrypt(cipher_text.encode())
+        decrypted = self.cipher.decrypt(encrypted_data.encode())
         return decrypted.decode()
 
     def encrypt_dict(self, data: Dict[str, Any]) -> str:
@@ -107,8 +103,6 @@ class AccessControl:
     """Manages access control and authentication."""
     
     def __init__(self, secret_key: Optional[str] = None, algorithm: Optional[str] = None):
-
-    def __init__(self, secret_key: Optional[str] = None):
         """
         Initialize access control.
 
