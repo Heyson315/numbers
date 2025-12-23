@@ -99,6 +99,20 @@
 - **Models**: Place new ML models in `models/` and load via `src/` modules.
 - **Config**: Add new env vars to `.env.example` and document in README.
 
+## Common Error Patterns & Solutions
+- **Import Errors**: Always use `from src.module import Class`, never relative imports. Ensure virtual environment is activated.
+- **Encryption Key Errors**: Generate valid keys with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`. Never reuse development keys in production.
+- **JWT Token Expiry**: Default 24h expiry. For testing, use `/api/login` to get fresh tokens.
+- **Frontend Build**: Run `npm install` if you see module errors. TypeScript errors block builds - fix before proceeding.
+- **Test Failures**: Ensure `logs/`, `models/`, `secure_data/` directories exist. Run `pytest -v` for verbose output.
+
+## Testing Best Practices
+- **Unit Tests**: Test individual functions in isolation. Use mocks for external dependencies.
+- **Integration Tests**: Test full workflows (API → database → response).
+- **Security Tests**: Validate JWT handling, encryption/decryption, rate limiting. Never commit test credentials.
+- **Coverage Goals**: Maintain 80%+ coverage. Use `pytest --cov=src --cov-report=term-missing` to identify gaps.
+- **Test Data**: Use `tests/fixtures/` for sample data. Never use real client data in tests.
+
 ## Examples & References
 
 ## Documentation & Support
