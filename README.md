@@ -500,6 +500,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed contribution guidelines.
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
+Copyright © 2025 Hassan Rahman (Heyson315)
+
 ## ⚠️ Disclaimer
 
 This software is provided as-is for CPA firms to automate financial processes. Users are responsible for:
