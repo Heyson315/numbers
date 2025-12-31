@@ -463,7 +463,7 @@ async def get_audit_log(
 @limiter.limit("5/minute")
 async def initiate_qbo_auth(request: Request, user: Dict[str, Any] = Depends(verify_token)):
     """Start QuickBooks OAuth flow."""
-    from src.integrations.quickbooks import QuickBooksAuth
+    from integrations.quickbooks import QuickBooksAuth
     
     if not access_control.check_permission(user.get('role', ''), 'manage_users'):
         raise HTTPException(status_code=403, detail="Insufficient permissions")
