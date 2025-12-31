@@ -188,7 +188,7 @@ class EnhancedReconciliation:
             pot_desc = potential.get("description", "")
             
             # Calculate scores
-            amount_score = 1 - min(abs(txn_amount - pot_amount) / max(txn_amount, pot_amount), 1)
+            amount_score = 1 - min(abs(txn_amount - pot_amount) / max(txn_amount, pot_amount), 1) if max(txn_amount, pot_amount) > 0 else 1.0
             date_score = 1 - min(abs((txn_date - pot_date).days) / 30, 1)
             desc_score = self.fuzzy_match_description(txn_desc, pot_desc)
             
